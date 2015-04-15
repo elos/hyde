@@ -1,4 +1,4 @@
-asdfkjasdf
+Action
 ------
 
 An action is something a user can be doing. An action should not be confused with an [event](event.md), which is anything that can happen to a user. For example, you can imagine synchronous events - a user can be studying, and at the library. The events could be split: studying would mirror being at the library. The action would only ever be studying. Perhaps "walking to the library" would be another.

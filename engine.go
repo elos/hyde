@@ -32,10 +32,12 @@ func (e *Engine) RootDir() string {
 }
 
 func NewEngine(rootPath string) (*Engine, error) {
+	log.Print("dd")
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, err
 	}
+	log.Print("bb")
 
 	fm := make(FileMap)
 
@@ -48,14 +50,21 @@ func NewEngine(rootPath string) (*Engine, error) {
 		Stopper:     make(autonomous.Stopper),
 		NodeChanges: make(chan *FileNode, 20),
 	}
+	log.Print("cc")
 
 	e.loadPath(rootPath)
+	log.Print("ee")
 
 	return e, nil
 }
 
 func (e *Engine) loadPath(path string) *FileNode {
-	log.Print("loadpath: ", path)
+	// log.Print("loadpath: ", path)
+	base := filepath.Base(path)
+	if len(base) > 0 && string(base[0]) == "." {
+		return nil
+	}
+
 	node := NewFileNode(path)
 	(*e.fmap)[path] = node
 
@@ -74,7 +83,7 @@ func (e *Engine) loadPath(path string) *FileNode {
 		}
 	}
 
-	e.NodeChanges <- node
+	go func() { e.NodeChanges <- node }()
 	return node
 }
 

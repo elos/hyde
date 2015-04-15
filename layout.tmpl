@@ -2,36 +2,31 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <style>
-            .nav ul {
-                list-style-type: none;
-            }
-
-            ul {
-                padding: 0;
-            }
-
-            li > ul > li {
-                margin-left: 10px;
-                color: red;
-            }
-        </style>
+        <link rel="stylesheet" type="text/css" href="/assets/prism.css">
+        <link rel="stylesheet" type="text/css" href="/assets/style.css">
     </head>
     <body>
+        <div class="header">
+        <img src="/assets/logo.png" alt="elos">
+        </div>
         <div class="nav">
+            <p> DOCUMENTATION </p>
             <ul>
             {{range $key, $value := .Nav.Subs}}
                 {{template "Nav" $value }}
             {{end}}
             </ul>
         </div>
-        {{ .Content }}
+        <div class="content">
+            {{ .Content }}
+        </div>
+        <script src="/assets/prism.js"></script>
     </body>
 </html>
 
 {{define "Nav"}}
     <li>
-        {{.This}}
+        <a href="{{ .Link }}"> {{.Name}} </a>
         <ul>
         {{range $key, $val := .Subs}}
            {{template "Nav" $val}}

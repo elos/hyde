@@ -5,8 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/elos/autonomous"
@@ -22,16 +20,17 @@ type Server struct {
 	*Engine
 	*http.Server
 	*httprouter.Router
+	registeredRoutes map[string]httprouter.Handle
 }
 
 type TreeNav struct {
-	This string
+	Name, Link string
 	*FileNode
 	Subs map[string]TreeNav
 }
 
 func BuildTreeNav(e *Engine) TreeNav {
-	t := TreeNav{This: filepath.Base(e.RootDir()), Subs: make(map[string]TreeNav)}
+	t := TreeNav{Subs: make(map[string]TreeNav)}
 	rootPath := e.RootDir()
 	for _, v := range e.FileMap() {
 		t.add(v, rootPath)
@@ -40,30 +39,27 @@ func BuildTreeNav(e *Engine) TreeNav {
 }
 
 func (t TreeNav) add(fn *FileNode, rootPath string) {
-	splits := strings.Split(strings.TrimPrefix(fn.Path, rootPath), "/")
-
-	subpath := rootPath
+	routeName := strings.TrimPrefix(fn.Path, rootPath)
+	splits := strings.Split(routeName, "/")
 
 	tt := t
+	for _, level := range splits {
+		_, ok := tt.Subs[level]
 
-	for i := range splits {
-		_, ok := tt.Subs[splits[i]]
 		if ok {
-			tt = tt.Subs[splits[i]]
+			tt = tt.Subs[level]
 			continue
 		}
 
-		name := splits[i]
-		file, _ := os.Stat(subpath)
-		if file.IsDir() {
-			name = name + "/"
+		nt := TreeNav{
+			Name:     level,
+			Link:     routeName,
+			FileNode: fn,
+			Subs:     make(map[string]TreeNav),
 		}
 
-		nt := TreeNav{This: name, Subs: make(map[string]TreeNav)}
-		tt.Subs[splits[i]] = nt
+		tt.Subs[level] = nt
 		tt = nt
-
-		subpath = filepath.Join(subpath, splits[i])
 	}
 
 	tt.FileNode = fn
@@ -77,13 +73,16 @@ func NewServer(e *Engine) *Server {
 		Handler: r,
 	}
 
+	r.ServeFiles("/assets/*filepath", http.Dir("../assets"))
+
 	return &Server{
 		Life:    autonomous.NewLife(),
 		Stopper: make(autonomous.Stopper),
 
-		Engine: e,
-		Server: s,
-		Router: r,
+		Engine:           e,
+		Server:           s,
+		Router:           r,
+		registeredRoutes: make(map[string]httprouter.Handle),
 	}
 }
 
@@ -112,8 +111,28 @@ func (s *Server) Listen() {
 }
 
 func (s *Server) loadNode(fn *FileNode) {
-	log.Printf("loadNode: %s", fn.Name)
-	s.Router.GET("/"+fn.Name, s.TemplateHandler(fn))
+	log.Print(fn.Path)
+	routeName := strings.TrimPrefix(fn.Path, s.Engine.RootDir())
+	if routeName == "" {
+		return
+	}
+
+	_, ok := s.registeredRoutes[routeName]
+	s.registeredRoutes[routeName] = s.TemplateHandler(fn)
+	if !ok {
+		s.Router.GET(routeName, s.Handle(routeName))
+	}
+}
+
+func (s *Server) Handle(path string) httprouter.Handle {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		h, ok := s.registeredRoutes[path]
+		if ok {
+			h(w, r, p)
+		} else {
+			http.NotFound(w, r)
+		}
+	}
 }
 
 func (s *Server) TemplateHandler(fn *FileNode) httprouter.Handle {
@@ -134,12 +153,17 @@ func (s *Server) TemplateHandler(fn *FileNode) httprouter.Handle {
 }
 
 func New(path string) (*Server, error) {
+	log.Print(path)
+	log.Print("1")
 	e, err := NewEngine(path)
+	log.Print("2")
 	if err != nil {
 		return nil, err
 	}
+	log.Print("3")
 
 	s := NewServer(e)
+	log.Print("3")
 	go e.Start()
 	return s, nil
 }

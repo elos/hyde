@@ -1,0 +1,101 @@
+@import "fonts.css";
+
+* {
+   padding: 0;
+   margin: 0;
+}
+
+body {
+    background-color: #FFFAF2;
+    font-family: "Avenir Next Regular";
+}
+
+h2 {
+    font-family: "Avenir Next Medium";
+    border-bottom: 1px solid #979797;
+    padding-bottom: 5px;
+}
+
+h2, h3, p, table, pre  {
+    margin-bottom: 10px;
+}
+
+div.nav p {
+    font-family: "Avenir Next Demi Bold";
+    letter-spacing: 1px;
+}
+
+div.nav {
+    font-size: .75em;
+}
+
+a {
+    color: #4183C4;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.header {
+    height: 100px;
+}
+
+.header img {
+    position: absolute;
+    top: 30px;
+    left: 50px;
+    width: 100px;
+}
+
+.nav {
+    position: absolute;
+    left: 50px;
+    width: 190px;
+    padding-right: 10px;
+    border-right: 1px solid #979797;
+    min-height: 500px;
+}
+
+.nav ul {
+    list-style-type: none;
+}
+
+ul {
+    padding: 0;
+}
+
+li > ul > li {
+    margin-left: 10px;
+}
+
+.content {
+    position: absolute;
+    left: 280px;
+    width: 700px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th {
+    font-family: "Avenir Next Medium";
+}
+
+td, th {
+    border: 1px solid #979797;
+    padding: 10px;
+}
+
+pre {
+    padding: 10px;
+    background-color: #F4F4F4;
+    border: 1px solid #979797;
+}
+
+code  {
+    font-size: .8em;
+}
+
