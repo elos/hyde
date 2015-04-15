@@ -15,11 +15,20 @@ type Engine struct {
 	autonomous.Managed
 	autonomous.Stopper
 
-	w    *fsnotify.Watcher
-	root *FileNode
-	fmap *FileMap
+	w       *fsnotify.Watcher
+	rootDir string
+	root    *FileNode
+	fmap    *FileMap
 
 	NodeChanges chan *FileNode
+}
+
+func (e *Engine) FileMap() FileMap {
+	return *e.fmap
+}
+
+func (e *Engine) RootDir() string {
+	return e.rootDir
 }
 
 func NewEngine(rootPath string) (*Engine, error) {
@@ -31,8 +40,9 @@ func NewEngine(rootPath string) (*Engine, error) {
 	fm := make(FileMap)
 
 	e := &Engine{
-		fmap: &fm,
-		w:    watcher,
+		fmap:    &fm,
+		w:       watcher,
+		rootDir: rootPath,
 
 		Life:        autonomous.NewLife(),
 		Stopper:     make(autonomous.Stopper),

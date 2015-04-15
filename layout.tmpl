@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <style>
+            .nav ul {
+                list-style-type: none;
+            }
+
+            ul {
+                padding: 0;
+            }
+
+            li > ul > li {
+                margin-left: 10px;
+                color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="nav">
+            <ul>
+            {{range $key, $value := .Nav.Subs}}
+                {{template "Nav" $value }}
+            {{end}}
+            </ul>
+        </div>
+        {{ .Content }}
+    </body>
+</html>
+
+{{define "Nav"}}
+    <li>
+        {{.This}}
+        <ul>
+        {{range $key, $val := .Subs}}
+           {{template "Nav" $val}}
+        {{end}}
+        </ul>
+    </li>
+{{end}}
