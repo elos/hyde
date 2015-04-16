@@ -1,14 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
+{{define "HEAD"}}
         <link rel="stylesheet" type="text/css" href="/assets/prism.css">
         <link rel="stylesheet" type="text/css" href="/assets/style.css">
-    </head>
-    <body>
-        <div class="header">
-        <img src="/assets/logo.png" alt="elos">
-        </div>
+{{end}}
+
+{{define "Pod"}}
         <div class="nav">
             <p> <a href="{{.Nav.Link}}"> {{.Nav.Name}} </a> </p>
             <ul>
@@ -21,8 +16,7 @@
             {{ .Content }}
         </div>
         <script src="/assets/prism.js"></script>
-    </body>
-</html>
+{{end}}
 
 {{define "Nav"}}
     <li>

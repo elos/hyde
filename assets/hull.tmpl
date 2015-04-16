@@ -1,0 +1,18 @@
+{{define "HEAD"}}
+    <link rel="stylesheet" type="text/css" href="/assets/hull.css">
+{{end}}
+
+{{define "Pod"}}
+    <h1 id="welcome"> Welcome to the elos documentation. </h1>
+    <div id="pods">
+        {{range .}}
+            <a href="{{.Link}}">
+                <div class="pod">
+                <h2>
+                    {{.Name}}
+                </h2>
+                </div>
+            </a>
+        {{end}}
+    </div>
+{{end}}

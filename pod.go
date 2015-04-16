@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -26,26 +27,24 @@ type Pod struct {
 	autonomous.Stopper
 
 	*Engine
-	*httprouter.Router
 	registered map[string]httprouter.Handle
 	layout     *template.Template
 	layoutDeck LayoutDeck
 }
 
 func NewPod(e *Engine, layout *template.Template, ld LayoutDeck) *Pod {
-	r := httprouter.New()
-
-	return &Pod{
+	p := &Pod{
 		Life:    autonomous.NewLife(),
 		Stopper: make(autonomous.Stopper),
 
 		Engine:     e,
-		Router:     r,
 		registered: make(map[string]httprouter.Handle),
 
 		layout:     layout,
 		layoutDeck: ld,
 	}
+
+	return p
 }
 
 func (p *Pod) Name() string {
@@ -76,28 +75,11 @@ func (p *Pod) route(fn *FileNode) string {
 
 func (p *Pod) mount(fn *FileNode) {
 	route := p.route(fn)
-
-	_, alreadyRegistered := p.registered[route]
 	p.registered[route] = p.handle(fn)
-
-	if !alreadyRegistered {
-		p.GET(route, p.topHandle(fn))
-	}
 }
 
 func (p *Pod) dismount(fn *FileNode) {
 	delete(p.registered, p.route(fn))
-}
-
-func (p *Pod) topHandle(fn *FileNode) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		h, ok := p.registered[p.route(fn)]
-		if ok {
-			h(w, r, params)
-		} else {
-			http.NotFound(w, r)
-		}
-	}
 }
 
 var extensionLanguages = map[string]string{
@@ -112,7 +94,19 @@ func codeFile(input []byte, ext, name string) template.HTML {
 
 func (p *Pod) handle(fn *FileNode) httprouter.Handle {
 	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-		input, _ := ioutil.ReadFile(fn.Path)
+		input, err := ioutil.ReadFile(fn.Path)
+		if err != nil {
+			if strings.Contains(err.Error(), "is a directory") {
+				input, err = ioutil.ReadFile(filepath.Join(fn.Path, "README.md"))
+				if err != nil {
+					input = []byte(fmt.Sprintf("This is the %s directory, you can add a README.md, which will show up here", p.route(fn)))
+				}
+			} else {
+				log.Print(err)
+				return
+			}
+		}
+
 		extension := filepath.Ext(fn.Path)
 
 		var content template.HTML
@@ -125,6 +119,8 @@ func (p *Pod) handle(fn *FileNode) httprouter.Handle {
 		} else if extension == ".png" {
 			w.Write(input)
 			return
+		} else if extension == "" {
+			content = template.HTML(input)
 		}
 
 		p.layout.Execute(w, Page{
@@ -157,7 +153,9 @@ func (p *Pod) treeNav() TreeNav {
 		splits := strings.Split(route, "/")
 		tt := t
 
+		subpath := "/"
 		for _, level := range splits {
+			subpath = filepath.Join(subpath, level)
 			_, ok := tt.Subs[level]
 
 			if ok {
@@ -167,7 +165,7 @@ func (p *Pod) treeNav() TreeNav {
 
 			nt := TreeNav{
 				Name: level,
-				Link: route,
+				Link: subpath,
 				Subs: make(map[string]TreeNav),
 			}
 
@@ -177,4 +175,13 @@ func (p *Pod) treeNav() TreeNav {
 	}
 
 	return t
+}
+
+func (p *Pod) Route(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	route := filepath.Join("/", p.Name(), params.ByName("subpath"))
+	if handle, ok := p.registered[route]; ok {
+		handle(w, r, params)
+	} else {
+		http.NotFound(w, r)
+	}
 }

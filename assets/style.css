@@ -38,16 +38,6 @@ a:hover {
     text-decoration: underline;
 }
 
-.header {
-    height: 100px;
-}
-
-.header img {
-    position: absolute;
-    top: 30px;
-    left: 50px;
-    width: 100px;
-}
 
 .nav {
     position: absolute;

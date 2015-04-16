@@ -1,0 +1,40 @@
+h1#welcome{
+    font-size: .8em;
+    width: 100%;
+    text-align:center;
+}
+
+div#pods {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    padding: 10px 40px;
+}
+
+div.pod {
+    background-color: #FFECCD;
+    min-width: 390px;
+    min-height: 150px;
+
+    border: 1px solid #979797;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 10px;
+}
+
+#pods > a {
+    text-decoration: none;
+    color: black;
+}
+
+div.pod > h2 {
+    font-family: "Avenir Next Medium";
+    letter-spacing: 1px;
+    font-size: .9em;
+    width: 100%;
+    text-align: center;
+}
