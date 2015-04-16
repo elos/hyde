@@ -84,12 +84,12 @@ func (h *Hull) index(w http.ResponseWriter, r *http.Request, params httprouter.P
 		return
 	}
 
-	pods := make([]*PodView, len(h.pods))
+	pods := make(map[string]*PodView)
 
 	var i int = 0
-	for k, v := range h.pods {
-		pods[i] = &PodView{
-			Name: strings.ToUpper(v.Name()),
+	for k, _ := range h.pods {
+		pods[k] = &PodView{
+			Name: strings.ToUpper(k),
 			Link: filepath.Join("/", k),
 		}
 		i++

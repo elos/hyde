@@ -1,6 +1,7 @@
 package hyde
 
 import (
+	"bytes"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -91,13 +92,32 @@ func (p *Pod) invalidateCachedTreeNav() {
 }
 
 var extensionLanguages = map[string]string{
-	".sh": "bash",
-	".go": "go",
+	".css":  "css",
+	".go":   "go",
+	".html": "html",
+	".js":   "javascript",
+	".sh":   "bash",
+	".tmpl": "html",
+}
+
+type CodeFile struct {
+	Name, Language, File string
 }
 
 func codeFile(input []byte, ext, name string) template.HTML {
-	return template.HTML(fmt.Sprintf("<h2>%s</h2><pre><code class='language-%s'>%s</code></pre>",
-		name, extensionLanguages[ext], template.HTML(input)))
+	var b bytes.Buffer
+	t, err := template.ParseFiles(filepath.Join(assetsDir, "templates/code.tmpl"))
+	if err != nil {
+		return template.HTML(err.Error())
+	}
+
+	t.Execute(&b, CodeFile{
+		Name:     name,
+		Language: extensionLanguages[ext],
+		File:     string(input),
+	})
+
+	return template.HTML(b.String())
 }
 
 func (p *Pod) handle(fn *FileNode) httprouter.Handle {
@@ -109,6 +129,7 @@ func (p *Pod) handle(fn *FileNode) httprouter.Handle {
 				if err != nil {
 					input = []byte(fmt.Sprintf("This is the %s directory, you can add a README.md, which will show up here", p.route(fn)))
 				}
+				input = blackfriday.MarkdownCommon(input)
 			} else {
 				log.Print(err)
 				return
