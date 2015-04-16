@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"path/filepath"
 
 	"github.com/elos/hyde"
@@ -14,11 +13,17 @@ var (
 
 func main() {
 	p, _ := filepath.Abs("../../../../../../github.com/elos/documentation")
-	log.Print(p)
-	s, err := hyde.New(p)
-	if err != nil {
-		log.Fatal(err)
-	}
-	go s.Start()
-	s.WaitStop()
+	// p, _ := filepath.Abs("../../models/")
+	/*
+		log.Print(p)
+		s, err := hyde.New(p)
+		if err != nil {
+			log.Fatal(err)
+		}
+		go s.Start()
+		s.WaitStop()
+	*/
+
+	hull := hyde.NewHull(":3000", p)
+	hull.Start()
 }

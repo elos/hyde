@@ -1,16 +1,27 @@
 package hyde
 
-import "path/filepath"
+import (
+	"path/filepath"
+	"strings"
+)
 
 type FileMap map[string]*FileNode
 
 type FileNode struct {
-	Path, Name string
+	Path, Root string
 }
 
-func NewFileNode(path string) *FileNode {
+func NewFileNode(path string, root string) *FileNode {
 	return &FileNode{
-		Name: filepath.Base(path),
 		Path: path,
+		Root: root,
 	}
+}
+
+func (fn *FileNode) Name() string {
+	return filepath.Base(fn.Path)
+}
+
+func (fn *FileNode) RelPath() string {
+	return strings.TrimPrefix(fn.Path, fn.Root)
 }

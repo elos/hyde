@@ -10,7 +10,7 @@
         <img src="/assets/logo.png" alt="elos">
         </div>
         <div class="nav">
-            <p> DOCUMENTATION </p>
+            <p> <a href="{{.Nav.Link}}"> {{.Nav.Name}} </a> </p>
             <ul>
             {{range $key, $value := .Nav.Subs}}
                 {{template "Nav" $value }}

@@ -70,10 +70,15 @@ li > ul > li {
     margin-left: 10px;
 }
 
+p > img {
+    border: 2px solid #979797;
+    width:100%;
+}
+
 .content {
     position: absolute;
     left: 280px;
-    width: 700px;
+    width: 870px;
 }
 
 table {

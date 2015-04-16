@@ -15,76 +15,78 @@ type Engine struct {
 	autonomous.Managed
 	autonomous.Stopper
 
-	w       *fsnotify.Watcher
-	rootDir string
-	root    *FileNode
-	fmap    *FileMap
+	w        *fsnotify.Watcher
+	RootedAt string
+	fmap     *FileMap
 
 	NodeChanges chan *FileNode
+	NodeRemoves chan *FileNode
 }
 
 func (e *Engine) FileMap() FileMap {
 	return *e.fmap
 }
 
-func (e *Engine) RootDir() string {
-	return e.rootDir
-}
-
-func NewEngine(rootPath string) (*Engine, error) {
-	log.Print("dd")
+func NewEngine(atPath string) (*Engine, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, err
 	}
-	log.Print("bb")
 
 	fm := make(FileMap)
 
 	e := &Engine{
-		fmap:    &fm,
-		w:       watcher,
-		rootDir: rootPath,
+		fmap:     &fm,
+		w:        watcher,
+		RootedAt: atPath,
 
 		Life:        autonomous.NewLife(),
 		Stopper:     make(autonomous.Stopper),
 		NodeChanges: make(chan *FileNode, 20),
 	}
-	log.Print("cc")
 
-	e.loadPath(rootPath)
-	log.Print("ee")
+	e.load(e.RootedAt)
 
 	return e, nil
 }
 
-func (e *Engine) loadPath(path string) *FileNode {
-	// log.Print("loadpath: ", path)
-	base := filepath.Base(path)
-	if len(base) > 0 && string(base[0]) == "." {
-		return nil
-	}
+func (e *Engine) watch(path string) {
+	e.w.Add(path)
+}
 
-	node := NewFileNode(path)
-	(*e.fmap)[path] = node
-
+func (e *Engine) load(path string) {
 	file, err := os.Stat(path)
 	if err != nil {
-		log.Print(err)
-		return node
+		return
+	}
+
+	base := filepath.Base(path)
+	if len(base) > 0 && string(base[0]) == "." {
+		return // cause file is hidden
 	}
 
 	if file.IsDir() {
-		e.w.Add(path)
-		files, _ := ioutil.ReadDir(path)
-
-		for i := range files {
-			e.loadPath(filepath.Join(path, files[i].Name()))
+		e.watch(path)
+		files, err := ioutil.ReadDir(path)
+		if err == nil {
+			for _, f := range files {
+				e.load(filepath.Join(path, f.Name()))
+			}
 		}
 	}
 
+	node := NewFileNode(path, e.RootedAt)
+	(*e.fmap)[path] = node
 	go func() { e.NodeChanges <- node }()
-	return node
+}
+
+func (e *Engine) remove(path string) {
+	node, ok := (*e.fmap)[path]
+
+	if ok {
+		go func() { e.NodeRemoves <- node }()
+		delete(*e.fmap, path)
+	}
 }
 
 func (e *Engine) Start() {
@@ -108,30 +110,29 @@ Run:
 	for {
 		select {
 		case event := <-events:
-			e.processFileEvent(event)
+			e.process(event)
 		case err := <-errors:
-			log.Printf("Watcher error:", err)
+			log.Printf("watcher error:", err)
 			go e.Stop()
 		case <-e.Stopper:
 			break Run
 		}
 	}
 
-	log.Print("engine died")
 	e.w.Close()
 	e.Life.End()
 }
 
-func (e *Engine) processFileEvent(event *fsnotify.Event) {
+func (e *Engine) process(event *fsnotify.Event) {
 	log.Print(event)
 	switch event.Op {
 	case fsnotify.Create:
-		e.loadPath(event.Name)
+		e.load(event.Name)
 	case fsnotify.Write:
-		e.loadPath(event.Name)
+		e.load(event.Name)
 	case fsnotify.Remove:
-		delete(*e.fmap, event.Name)
+		e.remove(event.Name)
 	case fsnotify.Rename:
-		delete(*e.fmap, event.Name)
+		e.remove(event.Name)
 	}
 }
