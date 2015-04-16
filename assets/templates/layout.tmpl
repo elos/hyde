@@ -1,9 +1,11 @@
 {{define "HEAD"}}
-        <link rel="stylesheet" type="text/css" href="/assets/prism.css">
-        <link rel="stylesheet" type="text/css" href="/assets/style.css">
+        <link rel="stylesheet" type="text/css" href="/assets/css/prism.css">
+        <link rel="stylesheet" type="text/css" href="/assets/css/pod.css">
 {{end}}
 
 {{define "Pod"}}
+    <div class="pod-layout">
+
         <div class="nav">
             <p> <a href="{{.Nav.Link}}"> {{.Nav.Name}} </a> </p>
             <ul>
@@ -12,10 +14,15 @@
             {{end}}
             </ul>
         </div>
+
         <div class="content">
             {{ .Content }}
         </div>
-        <script src="/assets/prism.js"></script>
+
+    </div>
+
+    <!-- leave this lower in the page for faster loading -->
+    <script src="/assets/js/prism.js"></script>
 {{end}}
 
 {{define "Nav"}}

@@ -30,6 +30,8 @@ type Pod struct {
 	registered map[string]httprouter.Handle
 	layout     *template.Template
 	layoutDeck LayoutDeck
+
+	cachedTreeNav *TreeNav
 }
 
 func NewPod(e *Engine, layout *template.Template, ld LayoutDeck) *Pod {
@@ -76,10 +78,16 @@ func (p *Pod) route(fn *FileNode) string {
 func (p *Pod) mount(fn *FileNode) {
 	route := p.route(fn)
 	p.registered[route] = p.handle(fn)
+	p.invalidateCachedTreeNav()
 }
 
 func (p *Pod) dismount(fn *FileNode) {
 	delete(p.registered, p.route(fn))
+	p.invalidateCachedTreeNav()
+}
+
+func (p *Pod) invalidateCachedTreeNav() {
+	p.cachedTreeNav = nil
 }
 
 var extensionLanguages = map[string]string{
@@ -143,6 +151,10 @@ type Page struct {
 }
 
 func (p *Pod) treeNav() TreeNav {
+	if p.cachedTreeNav != nil {
+		return *p.cachedTreeNav
+	}
+
 	t := TreeNav{
 		Name: strings.ToUpper(p.Name()),
 		Link: filepath.Join("/", p.Name()),

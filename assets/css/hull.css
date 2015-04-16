@@ -1,9 +1,11 @@
+/* welcome text above pod listing */
 h1#welcome{
     font-size: .8em;
     width: 100%;
     text-align:center;
 }
 
+/* flex-container for pod boxes */
 div#pods {
     display: flex;
     align-items: center;
@@ -14,8 +16,9 @@ div#pods {
     padding: 10px 40px;
 }
 
+/* pod box */
 div.pod {
-    background-color: #FFECCD;
+    background-color: white;
     min-width: 390px;
     min-height: 150px;
 
@@ -26,11 +29,13 @@ div.pod {
     margin: 10px;
 }
 
+/* remove classic link decoration for pod text */
 #pods > a {
     text-decoration: none;
     color: black;
 }
 
+/* style pod text */
 div.pod > h2 {
     font-family: "Avenir Next Medium";
     letter-spacing: 1px;

@@ -23,7 +23,7 @@ func NewHull(addr string, dirs ...string) *Hull {
 }
 
 func NewHullWithRouter(addr string, r *httprouter.Router, dirs ...string) *Hull {
-	r.ServeFiles("/assets/*filepath", http.Dir("../assets"))
+	r.ServeFiles("/assets/*filepath", http.Dir(assetsDir))
 
 	s := &http.Server{
 		Addr:    addr,
@@ -47,7 +47,7 @@ func NewHullWithRouter(addr string, r *httprouter.Router, dirs ...string) *Hull 
 }
 
 func (h *Hull) AddDir(dir string) {
-	t, err := template.ParseFiles("../assets/root.tmpl", "../assets/layout.tmpl")
+	t, err := template.ParseFiles(filepath.Join(assetsDir, "templates/root.tmpl"), filepath.Join(assetsDir, "templates/layout.tmpl"))
 	if err != nil {
 		log.Print(err)
 		return
@@ -77,7 +77,7 @@ type PodView struct {
 }
 
 func (h *Hull) index(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	t, err := template.ParseFiles("../assets/root.tmpl", "../assets/hull.tmpl")
+	t, err := template.ParseFiles(filepath.Join(assetsDir, "templates/root.tmpl"), filepath.Join(assetsDir, "templates/hull.tmpl"))
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

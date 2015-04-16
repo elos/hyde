@@ -10,6 +10,16 @@ import (
 	"github.com/go-fsnotify/fsnotify"
 )
 
+/*
+	An Engine is a slightly glorified fsnotify.Watcher,
+	it wathes a root directory recursively (meaning
+	it watches all the directories within that too)
+	and sends updates (relatively abstracted - just changes
+	and removes) regarding the file system on its channels
+	NodeChanges, NodeRemoves.
+
+	FileNodes are considered immutable
+*/
 type Engine struct {
 	autonomous.Life
 	autonomous.Managed
@@ -124,7 +134,6 @@ Run:
 }
 
 func (e *Engine) process(event *fsnotify.Event) {
-	log.Print(event)
 	switch event.Op {
 	case fsnotify.Create:
 		e.load(event.Name)

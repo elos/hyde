@@ -1,13 +1,44 @@
 @import "fonts.css";
 
-* {
-   padding: 0;
-   margin: 0;
+/* the flex layout for the pod nav/content */
+div.pod-layout {
+    width: 95vw;
+    display: flex;
+
+    margin: 0 2.5vw;
+    flex-direction: row;
 }
 
-body {
-    background-color: #FFFAF2;
-    font-family: "Avenir Next Regular";
+/* nav for the layout */
+div.nav {
+    flex: 0 0 15vw;
+    order: -1;
+
+    border-right: 1px solid #979797;
+    min-height: 70vh;
+
+    overflow-x: scroll;
+}
+
+/* content section of layout */
+div.content {
+    flex: 1;
+
+    margin-left: 2.5vw;
+    min-height: 100vh;
+    overflow-x: scroll;
+}
+
+/* mobile friendy collapses content under nav */
+@media (max-width: 768px) {
+    div.pod-layout {
+        flex-direction: column;
+    }
+
+    div.nav {
+        border: none;
+        border-bottom: 1px solid #979797;
+    }
 }
 
 h2 {
@@ -39,15 +70,6 @@ a:hover {
 }
 
 
-.nav {
-    position: absolute;
-    left: 50px;
-    width: 190px;
-    padding-right: 10px;
-    border-right: 1px solid #979797;
-    min-height: 500px;
-}
-
 .nav ul {
     list-style-type: none;
 }
@@ -65,11 +87,6 @@ p > img {
     width:100%;
 }
 
-.content {
-    position: absolute;
-    left: 280px;
-    width: 870px;
-}
 
 table {
     border-collapse: collapse;
