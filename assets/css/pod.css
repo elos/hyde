@@ -41,15 +41,20 @@ div.content {
     }
 }
 
+h2, h3, h4, p, table, pre  {
+    margin-bottom: 10px;
+}
+
 h2 {
     font-family: "Avenir Next Medium";
     border-bottom: 1px solid #979797;
     padding-bottom: 5px;
 }
 
-h2, h3, p, table, pre  {
-    margin-bottom: 10px;
+h3, h4 {
+    font-family: "Avenir Next Medium";
 }
+
 
 div.nav p {
     font-family: "Avenir Next Demi Bold";
