@@ -14,5 +14,28 @@
         <div id="pod">
             {{template "Pod" $}}
         </div>
+        <div id="altroot" style="display:none">
+            {{ template "BadBrowser" }}
+            <script type="text/javascript">
+                window.isChrome = !!window.chrome && !isOpera;
+                if (!window.isChrome) {
+                    var root = document.getElementById("pod");
+                    root.setAttribute("style", "display: none;");
+                    var altroot = document.getElementById("altroot");
+                    altroot.setAttribute("style", "");
+                }
+            </script>
+        </div>
     </body>
 </html>
+
+
+{{define "BadBrowser"}}
+    <div style="position: absolute; top:0; left:0; width:100%; height:100%;background:#EDEDED">
+        <div class="card" style="width:30%;margin:auto;margin-top:20%;">
+        <p style="font-family: Avenir Next Regular;text-align:center;">
+            Elos requires chrome. Our apologies.
+        </p>
+        </div>
+    </div>
+{{end}}

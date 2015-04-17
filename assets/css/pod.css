@@ -41,7 +41,7 @@ div.content {
     }
 }
 
-h2, h3, h4, ul, p, table, pre  {
+h2, h3, h4, ul, ol, p, table, pre  {
     margin-bottom: 10px;
 }
 
@@ -89,7 +89,7 @@ li > ul > li {
     margin-left: 10px;
 }
 
-ul {
+ul, ol {
     padding-left: 2em;
 }
 
