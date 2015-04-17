@@ -8,7 +8,7 @@
 
         <div class="nav">
             <p> <a href="{{.Nav.Link}}"> {{.Nav.Name}} </a> </p>
-            <ul>
+            <ul class="nav">
             {{range $key, $value := .Nav.Subs}}
                 {{template "Nav" $value }}
             {{end}}
@@ -28,7 +28,7 @@
 {{define "Nav"}}
     <li>
         <a href="{{ .Link }}"> {{.Name}} </a>
-        <ul>
+        <ul class="nav">
         {{range $key, $val := .Subs}}
            {{template "Nav" $val}}
         {{end}}

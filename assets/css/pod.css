@@ -41,7 +41,7 @@ div.content {
     }
 }
 
-h2, h3, h4, p, table, pre  {
+h2, h3, h4, ul, p, table, pre  {
     margin-bottom: 10px;
 }
 
@@ -75,11 +75,13 @@ a:hover {
 }
 
 
-.nav ul {
+ul.nav  {
     list-style-type: none;
+    padding: 0;
+    margin: 0;
 }
 
-ul {
+.nav > ul {
     padding: 0;
 }
 
@@ -87,11 +89,14 @@ li > ul > li {
     margin-left: 10px;
 }
 
-p > img {
-    border: 2px solid #979797;
-    width:100%;
+ul {
+    padding-left: 2em;
 }
 
+p > img {
+    width: 99%;
+    border: 1px solid #979797;
+}
 
 table {
     border-collapse: collapse;
@@ -115,4 +120,3 @@ pre {
 code  {
     font-size: .8em;
 }
-
