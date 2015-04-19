@@ -10,16 +10,12 @@ import (
 	"github.com/go-fsnotify/fsnotify"
 )
 
-/*
-	An Engine is a slightly glorified fsnotify.Watcher,
-	it wathes a root directory recursively (meaning
-	it watches all the directories within that too)
-	and sends updates (relatively abstracted - just changes
-	and removes) regarding the file system on its channels
-	NodeChanges, NodeRemoves.
-
-	FileNodes are considered immutable
-*/
+// An Engine is a slightly glorified fsnotify.Watcher,
+// it watches a root directory recursively (meaning
+// it watches all the directories within that too)
+// and sends updates (relatively abstracted - just changes
+// and removes) regarding the file system on its channels
+// NodeChanges, NodeRemoves.
 type Engine struct {
 	autonomous.Life
 	autonomous.Managed
@@ -33,10 +29,15 @@ type Engine struct {
 	NodeRemoves chan *FileNode
 }
 
+// A map of the files this engine is aware off
 func (e *Engine) FileMap() FileMap {
 	return *e.fmap
 }
 
+// NewEngine creates a new Engine, and recursively loads
+// the files at the given path, the given path becomes the
+// root directory of the engine
+// All initial FileNodes will be sent over NodeChanges
 func NewEngine(atPath string) (*Engine, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
@@ -60,10 +61,15 @@ func NewEngine(atPath string) (*Engine, error) {
 	return e, nil
 }
 
+// watch adds a path to the fsnotify.Watcher
 func (e *Engine) watch(path string) {
 	e.w.Add(path)
 }
 
+// load loads a given path into the engine
+// it takes care of recusively loading directories
+// ergo load imports the given path and all its
+// visible (meaning not .files) descendants
 func (e *Engine) load(path string) {
 	file, err := os.Stat(path)
 	if err != nil {
@@ -90,6 +96,8 @@ func (e *Engine) load(path string) {
 	go func() { e.NodeChanges <- node }()
 }
 
+// remove sends the FileNode over NodeRemoves and
+// deletes if from the FileMap
 func (e *Engine) remove(path string) {
 	node, ok := (*e.fmap)[path]
 
@@ -99,6 +107,8 @@ func (e *Engine) remove(path string) {
 	}
 }
 
+// Start begins an engine's life, includes listening
+// for events from the fsnotify.Watcher
 func (e *Engine) Start() {
 	e.Life.Begin()
 
@@ -133,6 +143,11 @@ Run:
 	e.Life.End()
 }
 
+// process routes an fsnotfiy.Event to the appropriate
+// handler function. load in the case of creation and
+// updates, and remove in the case of remove and rename
+// Note: when a file is renamed one event is sent for the rename,
+// and a create event is sent for the new file's name
 func (e *Engine) process(event *fsnotify.Event) {
 	switch event.Op {
 	case fsnotify.Create:
