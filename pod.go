@@ -22,6 +22,9 @@ func (ld LayoutDeck) Add(extension, location string) {
 	ld[extension] = t
 }
 
+// A Pod is a subdirectory of a Hull and is rooted at/maintains
+// a particular directory. When thinking about pods just think about
+// the logical breakdown of your documentation: i.e., backend, native, web
 type Pod struct {
 	autonomous.Life
 	autonomous.Managed

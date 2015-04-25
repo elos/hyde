@@ -4,14 +4,21 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/elos/httpserver/templates"
+	"github.com/elos/ehttp/templates"
 )
 
-type FileMap map[string]*FileNode
+var (
+	hydeImportPath = "github.com/elos/hyde"
+	assetsDir      = filepath.Join(templates.PackagePath(hydeImportPath), "assets")
+)
 
-type FileNode struct {
-	Path, Root string
-}
+type (
+	FileMap map[string]*FileNode
+
+	FileNode struct {
+		Path, Root string
+	}
+)
 
 func NewFileNode(path string, root string) *FileNode {
 	return &FileNode{
@@ -27,8 +34,3 @@ func (fn *FileNode) Name() string {
 func (fn *FileNode) RelPath() string {
 	return strings.TrimPrefix(fn.Path, fn.Root)
 }
-
-var (
-	hydeImportPath = "github.com/elos/hyde"
-	assetsDir      = filepath.Join(templates.PackagePath(hydeImportPath), "assets")
-)
