@@ -12,7 +12,7 @@ import (
 
 // An Engine is a slightly glorified fsnotify.Watcher, it watches
 // a root directory recursively (meaning it watches all the directories
-// within that too) // and sends updates (relatively abstracted - just
+// within that too) and sends updates (relatively abstracted - just
 // changes and removes) regarding the file system on its channels
 // NodeChanges, NodeRemoves.
 type Engine struct {
