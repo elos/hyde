@@ -11,17 +11,29 @@ import (
 	"github.com/elos/ehttp/serve"
 )
 
+// A hull is the abstraction layer for an entire section of
+// documentation, the pods of a hull are subsections of sort
+// i.e., http documentation with api, app and security pods.
 type Hull struct {
+	// Hull satisfies http.Handler interface
 	serve.Router
-
+	// the pods this hub is aware of
 	pods map[string]*Pod
 }
 
+// NewHull is a helper handler for NewHullWithRouter,
+// it uses the elos/ehttp/builtin router
+// Dirs is the directory roots for each of the hull's pods
 func NewHull(dirs ...string) *Hull {
 	r := builtin.NewRouter()
 	return NewHullWithRouter(r, dirs...)
 }
 
+// NewHullWithRouter constructures a hull using the provided
+// server.Router. The dirs are the root directories of the hull's
+// pods. The hull will imediately serve all hyde assets at
+// assets/*filepath. It will also server the hull index at h.index
+// It is a panic of you have already handled the "/" route on the Router.
 func NewHullWithRouter(r serve.Router, dirs ...string) *Hull {
 	r.ServeFiles("/assets/*filepath", http.Dir(assetsDir))
 
@@ -39,6 +51,8 @@ func NewHullWithRouter(r serve.Router, dirs ...string) *Hull {
 	return h
 }
 
+// AddDir is a means of adding root directories (as pods) to the hull post-creation
+// NewHullWithRouter relies on this as a convenience method
 func (h *Hull) AddDir(dir string) {
 	t, err := template.ParseFiles(filepath.Join(assetsDir, "templates/root.tmpl"), filepath.Join(assetsDir, "templates/layout.tmpl"))
 	if err != nil {
