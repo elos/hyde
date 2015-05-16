@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/elos/autonomous"
-	"github.com/julienschmidt/httprouter"
+	"github.com/elos/ehttp/serve"
 	"github.com/russross/blackfriday"
 )
 
@@ -31,7 +31,7 @@ type Pod struct {
 	autonomous.Stopper
 
 	*Engine
-	registered map[string]httprouter.Handle
+	registered map[string]serve.Route
 	layout     *template.Template
 	layoutDeck LayoutDeck
 
@@ -44,7 +44,7 @@ func NewPod(e *Engine, layout *template.Template, ld LayoutDeck) *Pod {
 		Stopper: make(autonomous.Stopper),
 
 		Engine:     e,
-		registered: make(map[string]httprouter.Handle),
+		registered: make(map[string]serve.Route),
 
 		layout:     layout,
 		layoutDeck: ld,
@@ -123,8 +123,8 @@ func codeFile(input []byte, ext, name string) template.HTML {
 	return template.HTML(b.String())
 }
 
-func (p *Pod) handle(fn *FileNode) httprouter.Handle {
-	return func(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func (p *Pod) handle(fn *FileNode) serve.Route {
+	return func(c *serve.Conn) {
 		input, err := ioutil.ReadFile(fn.Path)
 		if err != nil {
 			if strings.Contains(err.Error(), "is a directory") {
@@ -149,13 +149,13 @@ func (p *Pod) handle(fn *FileNode) httprouter.Handle {
 		} else if _, ok := extensionLanguages[extension]; ok {
 			content = codeFile(input, extension, fn.Name())
 		} else if extension == ".png" {
-			w.Write(input)
+			c.Write(input)
 			return
 		} else if extension == "" {
 			content = template.HTML(input)
 		}
 
-		p.layout.Execute(w, Page{
+		p.layout.Execute(c, Page{
 			Nav:     p.treeNav(),
 			Content: content,
 		})
@@ -213,11 +213,11 @@ func (p *Pod) treeNav() TreeNav {
 	return t
 }
 
-func (p *Pod) Route(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
-	route := filepath.Join("/", p.Name(), params.ByName("subpath"))
+func (p *Pod) Route(c *serve.Conn) {
+	route := filepath.Join("/", p.Name(), c.Val("subpath"))
 	if handle, ok := p.registered[route]; ok {
-		handle(w, r, params)
+		handle(c)
 	} else {
-		http.NotFound(w, r)
+		http.NotFound(c, c.Request())
 	}
 }

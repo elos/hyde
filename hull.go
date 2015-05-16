@@ -7,34 +7,27 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/julienschmidt/httprouter"
+	"github.com/elos/ehttp/builtin"
+	"github.com/elos/ehttp/serve"
 )
 
 type Hull struct {
-	router *httprouter.Router
-	server *http.Server
+	serve.Router
 
 	pods map[string]*Pod
 }
 
-func NewHull(addr string, dirs ...string) *Hull {
-	r := httprouter.New()
-	return NewHullWithRouter(addr, r, dirs...)
+func NewHull(dirs ...string) *Hull {
+	r := builtin.NewRouter()
+	return NewHullWithRouter(r, dirs...)
 }
 
-func NewHullWithRouter(addr string, r *httprouter.Router, dirs ...string) *Hull {
+func NewHullWithRouter(r serve.Router, dirs ...string) *Hull {
 	r.ServeFiles("/assets/*filepath", http.Dir(assetsDir))
 
-	s := &http.Server{
-		Addr:    addr,
-		Handler: r,
-	}
-
 	h := &Hull{
-		router: r,
-		server: s,
-
-		pods: make(map[string]*Pod),
+		Router: r,
+		pods:   make(map[string]*Pod),
 	}
 
 	r.GET("/", h.index)
@@ -63,24 +56,20 @@ func (h *Hull) AddDir(dir string) {
 	p := NewPod(e, t, nil)
 	go p.Start()
 
-	h.router.GET(filepath.Join("/", p.Name(), "/*subpath"), p.Route)
+	h.GET(filepath.Join("/", p.Name(), "/*subpath"), p.Route)
 
 	h.pods[p.Name()] = p
-}
-
-func (h *Hull) Start() {
-	log.Fatal(h.server.ListenAndServe())
 }
 
 type PodView struct {
 	Name, Link string
 }
 
-func (h *Hull) index(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func (h *Hull) index(c *serve.Conn) {
 	t, err := template.ParseFiles(filepath.Join(assetsDir, "templates/root.tmpl"), filepath.Join(assetsDir, "templates/hull.tmpl"))
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(c, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -95,5 +84,5 @@ func (h *Hull) index(w http.ResponseWriter, r *http.Request, params httprouter.P
 		i++
 	}
 
-	t.Execute(w, pods)
+	t.Execute(c, pods)
 }
