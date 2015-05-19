@@ -9,7 +9,7 @@ server as an abstraction over a filesystem server, providing some hyde-specific
 information like their root directory. They recursively inspect all non-hidden
 files.
 
-On step up from a `hyde.Engine` is a `hyde.Pod`. Each pod has an engine, and manages its rendered
+One step up from a `hyde.Engine` is a `hyde.Pod`. Each pod has an engine, and manages its rendered
 templates and serves http responses. At the top level there is a hull, which is a colleciton
 of documentation pods. An example would be the elos documentation, which is itself a hull, but
 has a colleciton of pods of documentation distributed throughout the elos repositories. Elos builds
