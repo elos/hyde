@@ -5,7 +5,7 @@ Package hyde provides a engine for generating static documentation sites.
 
 #### Architecture
 The architecture of hyde is quite simple. At the core there are `hyde.Engine`s, which
-server as an abstraction over a filesystem server, providing some hyde-specific
+serve as an abstraction over a filesystem server, providing some hyde-specific
 information like their root directory. They recursively inspect all non-hidden
 files.
 
