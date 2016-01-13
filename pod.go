@@ -214,7 +214,7 @@ func (p *Pod) treeNav() TreeNav {
 }
 
 func (p *Pod) Route(c *serve.Conn) {
-	route := filepath.Join("/", p.Name(), c.Val("subpath"))
+	route := filepath.Join("/", p.Name(), c.ParamVal("subpath"))
 	if handle, ok := p.registered[route]; ok {
 		handle(c)
 	} else {
